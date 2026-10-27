@@ -1,0 +1,31 @@
+id = "twiking.attention-jump"
+name = "Attention Jump"
+version = "0.1.0"
+min_herdr_version = "0.9.1"
+description = "Step to the next/previous agent that is working, blocked, done, or finished since you last looked at it, in sidebar order."
+platforms = ["linux", "macos"]
+
+[[actions]]
+id = "next"
+title = "Next agent needing attention"
+command = ["sh", "attention.sh", "next"]
+
+[[actions]]
+id = "prev"
+title = "Previous agent needing attention"
+command = ["sh", "attention.sh", "prev"]
+
+[[actions]]
+id = "reset"
+title = "Forget which agents have been seen"
+command = ["sh", "attention.sh", "reset"]
+
+# Record a visit however the agent got focus (click, alt+up/down, ...), and when the
+# focused agent itself changes state, e.g. finishes while you watch it.
+[[events]]
+on = "pane.focused"
+command = ["sh", "attention.sh", "seen"]
+
+[[events]]
+on = "pane.agent_status_changed"
+command = ["sh", "attention.sh", "seen"]
