@@ -36,11 +36,15 @@ save() {
 
 agents=$("$herdr" agent list) || exit 1
 
-# Forget panes that are gone, and mark the focused agent as seen
+# Forget panes that are gone, and mark the focused agent as seen. state_change_seq
+# lives only in server memory and pane ids can be reused after a restart, so a
+# stored seq above the current one is from a previous server: drop it.
 seen=$(jq -c --argjson a "$agents" '
   . as $seen
   | $a.result.agents
-  | (map({key: .pane_id, value: ($seen[.pane_id] // -1)}) | from_entries) as $kept
+  | (map(.state_change_seq as $s
+      | {key: .pane_id, value: ($seen[.pane_id] // -1 | if . > $s then -1 else . end)})
+     | from_entries) as $kept
   | (map(select(.focused)) | first) as $f
   | if $f then $kept | .[$f.pane_id] = $f.state_change_seq else $kept end' <<EOF
 $seen
